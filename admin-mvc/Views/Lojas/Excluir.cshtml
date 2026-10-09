@@ -1,0 +1,12 @@
+@model LojaVm
+@{ ViewData["Title"] = "Excluir loja"; }
+<h1 class="h4 mb-3 text-danger">Excluir loja</h1>
+<form asp-action="Excluir" asp-route-id="@Model.Id" method="post" class="card p-4 shadow-sm border-danger" style="max-width:600px">
+    <p>Você vai excluir <strong>@Model.Nome</strong> e <strong>tudo</strong> o que pertence a ela: @Model.Usuarios usuário(s), clientes, serviços, produtos, ordens de serviço e agendamentos.</p>
+    <p class="text-danger mb-3"><strong>Não tem volta.</strong> Se o problema for falta de pagamento, use <em>Suspender</em> em vez de excluir.</p>
+    <div class="mb-3">
+        <label class="form-label" for="confirmacao">Para confirmar, digite o nome da loja: <code>@Model.Nome</code></label>
+        <input id="confirmacao" name="confirmacao" class="form-control" autocomplete="off" />
+    </div>
+    <div class="d-flex gap-2"><button class="btn btn-danger" type="submit">Excluir definitivamente</button><a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a></div>
+</form>

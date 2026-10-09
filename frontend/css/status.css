@@ -1,0 +1,34 @@
+/* Cores de status do agendamento */
+
+.status-cell{
+  padding: 4px 8px;
+  border-radius: 5px;
+  text-align: center;
+  
+}
+.status-cell[data-status="Agendado"],
+.status-cell[data-status="Em andamento"]
+{
+  background: #fef3c7;
+  color: #926f0e;
+  font-weight: 700;
+
+}
+
+
+
+.status-cell[data-status="Realizado"]
+ {
+  background: #c4f3d2; 
+  color: #166534;
+  font-weight: 700;
+}
+
+
+.status-cell[data-status="Cancelado"]
+{
+  background: #d89a9abd; 
+  color: #991b1b;
+  font-weight: 700;
+}
+

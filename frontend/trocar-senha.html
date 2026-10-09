@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Nova senha - TechCare Soluções</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon"/>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.documentElement.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.body.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.compactarTabelas) {
+          document.body.dataset.compact = "true";
+        }
+
+        if (prefs.altoContraste) {
+          document.body.dataset.contrast = "true";
+        }
+      } catch {}
+    })();
+  </script>
+
+  <main
+    class="container content"
+    style="max-width: 520px; margin: 32px auto;"
+  >
+    <section class="panel">
+      <h1>Definir nova senha</h1>
+      <p id="trocarIntro">Por segurança, escolha uma senha só sua para continuar.</p>
+
+      <form id="trocarForm" class="form-grid">
+        <div id="atualBox" style="display:none;">
+          <label for="senhaAtual">Senha atual</label>
+          <input id="senhaAtual" type="password" autocomplete="current-password" aria-label="Senha atual" />
+        </div>
+
+        <div>
+          <label for="novaSenha">Nova senha</label>
+          <input id="novaSenha" type="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" aria-label="Nova senha" />
+        </div>
+
+        <div>
+          <label for="confirmarSenha">Confirmar nova senha</label>
+          <input id="confirmarSenha" type="password" required minlength="6" autocomplete="new-password" aria-label="Confirmar nova senha" />
+        </div>
+
+        <button type="submit">Salvar nova senha</button>
+      </form>
+
+      <p style="margin-top: 14px;"><a id="sairLink" href="login.html">Sair</a></p>
+
+      <div id="trocarMsg" style="margin-top: 12px; color: #dc2626;" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/trocar-senha.js"></script>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

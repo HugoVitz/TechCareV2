@@ -1,0 +1,3 @@
+Esta pasta é servida pela API (UseStaticFiles).
+Rode scripts/publicar-web.bat (na raiz do projeto) para compilar o app Flutter para web e copiá-lo para wwwroot/app.
+Depois abra http://IP-DO-PC:5000/app/ em qualquer celular ou computador da rede.

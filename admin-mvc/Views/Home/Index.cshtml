@@ -1,0 +1,20 @@
+@model List<LojaVm>
+@{ ViewData["Title"] = "Painel do Dono"; }
+<h1 class="h4 mb-3">Painel do Dono</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card card-kpi p-3"><div class="text-muted small">Lojas</div><div class="fs-3 fw-bold">@Model.Count</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-kpi p-3"><div class="text-muted small">Ativas</div><div class="fs-3 fw-bold">@Model.Count(l => l.Status == "Ativa")</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-kpi p-3"><div class="text-muted small">Suspensas</div><div class="fs-3 fw-bold text-danger">@Model.Count(l => l.Status != "Ativa")</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-kpi p-3"><div class="text-muted small">Pessoas online (sessões)</div><div class="fs-3 fw-bold">@Model.Sum(l => l.SessoesAtivas)</div></div></div>
+</div>
+
+@if (Model.Any(l => l.Vencida))
+{
+    <div class="alert alert-warning">
+        <strong>Atenção:</strong> há lojas com vencimento ultrapassado que serão suspensas automaticamente:
+        @string.Join(", ", Model.Where(l => l.Vencida).Select(l => l.Nome)).
+    </div>
+}
+
+<p class="text-muted">Aqui você controla quem usa o sistema: vence, suspende e derruba a sessão de quem não pagou. <a asp-controller="Lojas" asp-action="Index">Gerenciar lojas</a>.</p>

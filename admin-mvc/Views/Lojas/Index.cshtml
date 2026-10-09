@@ -1,0 +1,64 @@
+@model List<LojaVm>
+@{ ViewData["Title"] = "Lojas"; }
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Lojas (clientes do sistema)</h1>
+    <a class="btn btn-primary" asp-action="Nova">Nova loja</a>
+</div>
+
+<div class="table-wrap table-responsive">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr><th>Loja</th><th>Situação</th><th>Vencimento</th><th>Usuários</th><th>Online</th><th style="min-width:320px">Ações</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var l in Model)
+        {
+            var suspensa = l.Status != "Ativa";
+            <tr>
+                <td>
+                    <strong>@l.Nome</strong><br />
+                    <a class="small" asp-controller="Usuarios" asp-action="Index" asp-route-lojaId="@l.Id">ver usuários</a>
+                </td>
+                <td>
+                    @if (suspensa) { <span class="badge text-bg-danger badge-status">Suspensa</span> <div class="small text-muted">@l.MotivoSuspensao</div> }
+                    else if (l.Vencida) { <span class="badge text-bg-warning badge-status">Vencida</span> }
+                    else { <span class="badge text-bg-success badge-status">Ativa</span> }
+                </td>
+                <td>
+                    <form asp-action="Vencimento" asp-route-id="@l.Id" method="post" class="d-flex gap-1">
+                        <input type="date" name="vencimentoEm" class="form-control form-control-sm" value="@(l.VencimentoEm?.ToString("yyyy-MM-dd"))" />
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Salvar</button>
+                    </form>
+                </td>
+                <td>@l.Usuarios <span class="text-muted small">(@l.Admins admin)</span></td>
+                <td>@l.SessoesAtivas</td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                    @if (!suspensa)
+                    {
+                        <form asp-action="Suspender" asp-route-id="@l.Id" method="post" class="d-flex gap-1"
+                              onsubmit="return confirm('Suspender @l.Nome e derrubar todas as sessões agora?');">
+                            <input name="motivo" class="form-control form-control-sm" placeholder="Motivo (ex.: falta de pagamento)" />
+                            <button class="btn btn-sm btn-danger" type="submit">Suspender</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Reativar" asp-route-id="@l.Id" method="post" class="d-flex gap-1">
+                            <input type="date" name="novoVencimentoEm" class="form-control form-control-sm" title="Novo vencimento" />
+                            <button class="btn btn-sm btn-success" type="submit">Reativar</button>
+                        </form>
+                    }
+                    <form asp-action="DerrubarSessoes" asp-route-id="@l.Id" method="post"
+                          onsubmit="return confirm('Derrubar todas as sessões de @l.Nome?');">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Derrubar sessões</button>
+                    </form>
+                    <a class="btn btn-sm btn-warning" asp-action="Editar" asp-route-id="@l.Id">Editar</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Excluir" asp-route-id="@l.Id">Excluir</a>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

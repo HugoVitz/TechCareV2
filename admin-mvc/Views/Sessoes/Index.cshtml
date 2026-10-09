@@ -1,0 +1,27 @@
+@model List<SessaoVm>
+@{ ViewData["Title"] = "Sessões ativas"; }
+<h1 class="h4 mb-3">Sessões ativas</h1>
+<div class="table-wrap table-responsive">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Usuário</th><th>Loja</th><th>Perfil</th><th>Entrou em</th><th>Última atividade</th><th>IP</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td>@s.UsuarioNome <span class="text-muted small">@s.Cargo</span> @if (s.Online) { <span class="badge text-bg-primary">online</span> }</td>
+                <td>@(s.LojaNome ?? "—")</td>
+                <td>@s.Perfil</td>
+                <td>@s.CriadaEm.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                <td>@s.UltimaAtividade.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                <td>@s.Ip</td>
+                <td>
+                    @if (!s.Atual)
+                    {
+                        <form asp-action="Derrubar" asp-route-id="@s.Id" method="post"><button class="btn btn-sm btn-outline-danger" type="submit">Derrubar</button></form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

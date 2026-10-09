@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Cadastro de Serviços • TechCare</title>
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) document.documentElement.dataset.theme = prefs.tema;
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) document.body.dataset.theme = prefs.tema;
+        if (prefs.compactarTabelas) document.body.dataset.compact = "true";
+        if (prefs.altoContraste) document.body.dataset.contrast = "true";
+      } catch {}
+    })();
+  </script>
+
+  <aside class="sidebar">
+    <h1>TechCare Soluções</h1>
+
+    <nav>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="clientes.html"><i data-lucide="users"></i> Clientes</a>
+      <a href="agendamentos.html"><i data-lucide="calendar-days"></i> Agendamentos</a>
+      <a href="servicos.html"><i data-lucide="clipboard-list"></i> Ordens de Serviço</a>
+      <a href="cadastro-servicos.html" class="active" data-admin-only><i data-lucide="wrench"></i> Serviços</a>
+      <a href="produtos.html" data-admin-only><i data-lucide="package"></i> Produtos</a>
+      <a href="financeiro.html" data-admin-only><i data-lucide="wallet"></i> Financeiro</a>
+      <a href="historico.html" data-admin-only><i data-lucide="history"></i> Histórico</a>
+
+      <a href="usuarios.html" data-admin-only><i data-lucide="user-cog"></i> Atendentes</a>
+      <a href="configuracoes.html"><i data-lucide="settings"></i> Configurações</a>
+
+      <div class="logout">
+        <a id="logoutLink" href="login.html"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Cadastro de Serviços</h1>
+      <p>Cadastre, consulte e remova serviços usados nas ordens de serviço.</p>
+    </header>
+
+    <section class="panel">
+      <h2>Novo Serviço</h2>
+      <p>Preencha as informações abaixo para cadastrar um serviço.</p>
+
+      <form id="servicoForm" class="form-grid">
+        <input type="hidden" id="id" />
+
+        <div>
+          <label for="titulo">Título do serviço</label>
+          <input type="text" id="titulo" placeholder="Digite o título do serviço" required />
+        </div>
+
+        <div>
+          <label for="descricao">Descrição do serviço</label>
+          <textarea id="descricao" placeholder="Digite a descrição do serviço" rows="4" required></textarea>
+        </div>
+
+        <div>
+          <label for="valor">Valor do serviço</label>
+          <input type="text" id="valor" placeholder="R$ 0,00" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Cadastrar</button>
+          <button type="button" class="secondary" onclick="limparFormularioServico()">Limpar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Serviços cadastrados</h2>
+      <p>Veja abaixo os serviços já cadastrados no sistema.</p>
+
+      <table aria-label="Tabela de serviços cadastrados">
+        <caption>Lista de serviços cadastrados</caption>
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody id="servicosTableBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+
+  <script type="module">
+    import { requireAuth } from "./js/guard.js";
+    import { initAppState } from "./js/appState.js";
+
+    await requireAuth();
+    await initAppState();
+  </script>
+  <script src="js/formAutosave.js"></script>
+  <script type="module" src="./js/logout.js"></script>
+  <script src="js/cadastro-servicos.js"></script>
+  <script src="js/leituraVoz.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget("https://vlibras.gov.br/app");
+  </script>
+</body>
+</html>

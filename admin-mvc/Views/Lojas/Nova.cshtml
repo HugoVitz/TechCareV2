@@ -1,0 +1,13 @@
+@model NovaLojaVm
+@{ ViewData["Title"] = "Nova loja"; }
+<h1 class="h4 mb-3">Nova loja</h1>
+<form asp-action="Nova" method="post" class="card p-4 shadow-sm" style="max-width:640px">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+    <div class="mb-3"><label asp-for="Nome" class="form-label">Nome da loja</label><input asp-for="Nome" class="form-control" /><span asp-validation-for="Nome" class="text-danger small"></span></div>
+    <div class="mb-3"><label asp-for="VencimentoEm" class="form-label">Pago até (vencimento)</label><input asp-for="VencimentoEm" type="date" class="form-control" /><div class="form-text">Vazio = sem vencimento. Depois do vencimento + 3 dias de carência a loja é suspensa sozinha.</div></div>
+    <hr />
+    <div class="mb-3"><label asp-for="AdminUsuario" class="form-label">Usuário do administrador</label><input asp-for="AdminUsuario" class="form-control" /><span asp-validation-for="AdminUsuario" class="text-danger small"></span></div>
+    <div class="mb-3"><label asp-for="AdminNome" class="form-label">Nome do administrador</label><input asp-for="AdminNome" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="AdminSenha" class="form-label">Senha provisória (vazio = gerar)</label><input asp-for="AdminSenha" class="form-control" autocomplete="off" /><span asp-validation-for="AdminSenha" class="text-danger small"></span></div>
+    <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Criar loja</button><a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a></div>
+</form>

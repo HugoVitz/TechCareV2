@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Configurações - TechCare Soluções</title>
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/stylecfg.css" />
+
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.documentElement.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+ 
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.body.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.compactarTabelas) {
+          document.body.dataset.compact = "true";
+        }
+
+        if (prefs.altoContraste) {
+          document.body.dataset.contrast = "true";
+        }
+      } catch {}
+    })();
+  </script>
+
+  <aside class="sidebar">
+    <h1>TechCare Soluções</h1>
+
+    <nav>
+      <a href="index.html">
+        <i data-lucide="layout-dashboard"></i>
+        Dashboard
+      </a>
+
+      <a href="clientes.html">
+        <i data-lucide="users"></i>
+        Clientes
+      </a>
+
+      <a href="agendamentos.html">
+        <i data-lucide="calendar-days"></i>
+        Agendamentos
+      </a>
+
+      <a href="servicos.html">
+        <i data-lucide="clipboard-list"></i>
+        Ordens de Serviço
+      </a>
+
+      <a href="cadastro-servicos.html" data-admin-only>
+        <i data-lucide="wrench"></i>
+        Serviços
+      </a>
+
+      <a href="produtos.html" data-admin-only><i data-lucide="package"></i> Produtos</a>
+
+      <a href="financeiro.html" data-admin-only><i data-lucide="wallet"></i> Financeiro</a>
+
+      <a href="historico.html" data-admin-only><i data-lucide="history"></i> Histórico</a>
+
+      <a href="usuarios.html" data-admin-only><i data-lucide="user-cog"></i> Atendentes</a>
+
+      <a href="configuracoes.html" class="active">
+        <i data-lucide="settings"></i>
+        Configurações
+      </a>
+
+      <div class="logout">
+        <a id="logoutLink" href="login.html">
+          <i data-lucide="log-out"></i>
+          Sair
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Configurações do Sistema</h1>
+
+      <p>
+        Personalize aparência, acessibilidade e preferências da plataforma.
+      </p>
+    </header>
+
+    <section class="panel" id="perfil">
+      <h2>Meu perfil</h2>
+      <p>Sua foto aparece no menu, no ranking e na lista da equipe. Quem fechar o mês em 1º lugar ganha destaque dourado.</p>
+
+      <div class="perfil-card">
+        <div id="perfilAvatar"></div>
+
+        <div class="perfil-info">
+          <div id="perfilSelo"></div>
+
+          <div class="os-field">
+            <label for="perfilNome">Nome</label>
+            <input type="text" id="perfilNome" maxlength="200" />
+          </div>
+
+          <div class="os-field">
+            <label for="perfilCargo">Cargo</label>
+            <input type="text" id="perfilCargo" maxlength="200" placeholder="Ex.: Vendedor, Técnico" />
+          </div>
+
+          <div class="perfil-acoes">
+            <button type="button" id="perfilSalvar">Salvar dados</button>
+            <button type="button" class="secondary" id="perfilFotoBtn">Enviar foto</button>
+            <button type="button" class="secondary" id="perfilFotoRemover">Remover foto</button>
+            <a href="trocar-senha.html" class="secondary" role="button" style="padding:10px 16px;border-radius:8px;text-decoration:none;display:inline-block;">Trocar minha senha</a>
+            <input type="file" id="perfilFotoArquivo" accept="image/*" hidden />
+          </div>
+          <p id="perfilMsg" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel settings-grid">
+      <h2>Configurações de Aparência</h2>
+
+      <div class="settings-row">
+        <div>
+          <strong>Tema escuro</strong>
+
+          <span>
+            Alterna entre o modo claro e o modo escuro do sistema.
+          </span>
+        </div>
+
+        <label class="switch" aria-label="Ativar tema escuro">
+          <input id="toggleTheme" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <strong>Cor principal</strong>
+
+          <span>
+            Escolha a cor principal utilizada no sistema.
+          </span>
+        </div>
+
+        <div class="color-choices" aria-label="Escolher cor principal">
+          <button type="button" class="color-dot" data-color="#2563eb" style="background:#2563eb;"></button>
+          <button type="button" class="color-dot" data-color="#0ea5e9" style="background:#0ea5e9;"></button>
+          <button type="button" class="color-dot" data-color="#4f46e5" style="background:#4f46e5;"></button>
+          <button type="button" class="color-dot" data-color="#7c3aed" style="background:#7c3aed;"></button>
+          <button type="button" class="color-dot" data-color="#15803d" style="background:#15803d;"></button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <strong>Compactar tabelas</strong>
+
+          <span>
+            Reduz os espaçamentos internos das tabelas.
+          </span>
+        </div>
+
+        <label class="switch" aria-label="Compactar tabelas">
+          <input id="toggleCompact" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel settings-grid">
+      <h2>Configurações de Acessibilidade</h2>
+
+      <div class="settings-row">
+        <div>
+          <strong>Tamanho da fonte</strong>
+
+          <span>
+            Ajusta o tamanho dos textos exibidos no sistema.
+          </span>
+        </div>
+
+        <div class="font-controls">
+          <button
+            type="button"
+            id="fontMinus"
+            class="font-step"
+            aria-label="Diminuir tamanho da fonte"
+          >
+            A-
+          </button>
+
+          <strong id="fontValue">
+            100%
+          </strong>
+
+          <button
+            type="button"
+            id="fontPlus"
+            class="font-step"
+            aria-label="Aumentar tamanho da fonte"
+          >
+            A+
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <strong>Alto contraste</strong>
+
+          <span>
+            Melhora a visibilidade de textos e elementos visuais.
+          </span>
+        </div>
+
+        <label class="switch" aria-label="Ativar alto contraste">
+          <input id="toggleContrast" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <strong>VLibras</strong>
+
+          <span>
+            Ativa o tradutor automático em Libras para acessibilidade.
+          </span>
+
+          <div id="vlibrasBox" class="vlibras-box">
+            Status:
+            <span id="vlibrasStatus">
+              Desativado
+            </span>
+          </div>
+        </div>
+
+        <label class="switch" aria-label="Ativar VLibras">
+          <input id="toggleVLibras" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <button id="toggleLeitura">
+            Ativar leitura por voz
+          </button>
+          <span>
+            Reproduz uma mensagem utilizando voz em português.
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <div class="form-actions" style="margin-top:12px;">
+      <button type="button" id="btnReset" class="secondary">Restaurar configurações padrão</button>
+    </div>
+
+  </main>
+
+  <script src="js/api.js"></script>
+
+  <script type="module">
+    import { requireAuth } from "./js/guard.js";
+    import { initAppState } from "./js/appState.js";
+
+    await requireAuth();
+    await initAppState();
+  </script>
+  <script src="js/formAutosave.js"></script>
+  <script type="module" src="./js/logout.js"></script>
+  <script type="module" src="./js/configuracoes.js"></script>
+  <script src="js/leituraVoz.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# Compila o app Flutter para WEB na nuvem (útil quando o Windows bloqueia o Flutter local).
+# Uso: suba o conteúdo da pasta mobile/ para um repositório no GitHub,
+# abra a aba Actions > "Build Flutter Web" > Run workflow e baixe o artefato "techcare-app-web".
+name: Build Flutter Web
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Gerar a pasta web e baixar pacotes
+        run: |
+          flutter create . --platforms=web --org br.com.techcare --project-name techcare_mobile
+          flutter pub get
+
+      - name: Analisar e testar
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings
+          flutter test
+
+      - name: Compilar para web
+        run: flutter build web --release --base-href /app/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: techcare-app-web
+          path: build/web

@@ -1,0 +1,29 @@
+@model LoginVm
+@{
+    ViewData["Title"] = "Entrar";
+}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-1">Console do Dono</h1>
+                <p class="text-muted">Controle de lojas, pagamentos e acessos.</p>
+
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+                    <div class="mb-3">
+                        <label asp-for="Usuario" class="form-label">Usuário</label>
+                        <input asp-for="Usuario" class="form-control" autocomplete="username" autofocus />
+                        <span asp-validation-for="Usuario" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Senha" class="form-label">Senha</label>
+                        <input asp-for="Senha" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Senha" class="text-danger small"></span>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+@model List<UsuarioVm>
+@{
+    ViewData["Title"] = "Usuários";
+    var lojaId = ViewData["LojaId"] as int?;
+}
+<h1 class="h4 mb-3">Usuários de todas as lojas</h1>
+@if (lojaId.HasValue) { <p><a asp-action="Index">Mostrar todas as lojas</a></p> }
+
+<div class="table-wrap table-responsive">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Usuário</th><th>Loja</th><th>Cargo</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th style="min-width:300px">Ações</th></tr></thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td><strong>@u.UsuarioNome</strong><div class="small text-muted">@u.Nome</div></td>
+                <td>@(u.LojaNome ?? "—")</td>
+                <td>@u.Cargo</td>
+                <td>@u.Perfil</td>
+                <td>
+                    @if (!u.Ativo) { <span class="badge text-bg-danger">Bloqueado</span> }
+                    else if (u.Online) { <span class="badge text-bg-primary">Online</span> }
+                    else { <span class="badge text-bg-success">Ativo</span> }
+                    @if (u.DeveTrocarSenha) { <span class="badge text-bg-secondary">senha provisória</span> }
+                </td>
+                <td>@(u.UltimoAcessoEm?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                <td>
+                    @if (u.Perfil != "Dono")
+                    {
+                        <div class="d-flex flex-wrap gap-1">
+                            <form asp-action="SenhaTemporaria" asp-route-id="@u.Id" asp-route-usuario="@u.UsuarioNome" method="post"
+                                  onsubmit="return confirm('Gerar senha provisória para @u.UsuarioNome?');">
+                                <button class="btn btn-sm btn-primary" type="submit">Senha perdida</button>
+                            </form>
+                            <form asp-action="Derrubar" asp-route-id="@u.Id" asp-route-lojaId="@lojaId" method="post">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Derrubar sessão</button>
+                            </form>
+                            <form asp-action="Ativo" asp-route-id="@u.Id" asp-route-lojaId="@lojaId" asp-route-ativo="@(!u.Ativo)" method="post">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(u.Ativo ? "Bloquear" : "Reativar")</button>
+                            </form>
+                            <a class="btn btn-sm btn-warning" asp-action="Editar" asp-route-id="@u.Id" asp-route-lojaId="@lojaId">Editar</a>
+                            <form asp-action="Excluir" asp-route-id="@u.Id" asp-route-lojaId="@lojaId" method="post"
+                                  onsubmit="return confirm('Excluir o usuário @u.UsuarioNome? Não tem volta.');">
+                                <button class="btn btn-sm btn-danger" type="submit">Excluir</button>
+                            </form>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

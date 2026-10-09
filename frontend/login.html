@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Login - TechCare Soluções</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon"/>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.documentElement.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.body.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.compactarTabelas) {
+          document.body.dataset.compact = "true";
+        }
+
+        if (prefs.altoContraste) {
+          document.body.dataset.contrast = "true";
+        }
+      } catch {}
+    })();
+  </script>
+
+  <main
+    class="container content"
+    style="max-width: 520px; margin: 32px auto;"
+  >
+    <section class="panel">
+      <h1>Login</h1>
+
+      <form id="loginForm" class="form-grid">
+        <div>
+          <label for="usuario">Nome</label>
+
+          <input
+            id="usuario"
+            type="text"
+            placeholder="Digite seu usuário"
+            required
+            aria-label="Nome de usuário"
+          />
+        </div>
+
+        <div>
+          <label for="senha">Senha</label>
+
+          <input
+            id="senha"
+            type="password"
+            placeholder="Digite sua senha"
+            required
+            minlength="6"
+            aria-label="Senha"
+          />
+        </div>
+
+        <button type="submit">
+          Entrar no sistema
+        </button>
+      </form>
+
+      <p style="margin-top: 14px; color: #475569;">
+        Não possui uma conta? Peça ao administrador da sua loja para criar o seu acesso.
+      </p>
+
+      <div
+        id="loginMessage"
+        style="margin-top: 12px; color: #dc2626;"
+        aria-live="polite"
+      ></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initAppState } from "./js/appState.js";
+
+    await initAppState();
+  </script>
+  <script src="js/api.js"></script>
+  <script src="js/login.js"></script>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+</body>
+</html>

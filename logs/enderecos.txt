@@ -1,0 +1,5 @@
+﻿Sistema (clientes):  http://192.168.15.3:5000
+Console do Dono:     http://localhost:5100
+Swagger:             http://localhost:5000/swagger
+Endereço da API no app: http://192.168.15.3:5000/api
+Logins de teste: dono / dono123 (Console)   admin / admin123 (loja)

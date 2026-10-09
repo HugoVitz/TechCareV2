@@ -1,0 +1,14 @@
+@model List<AuditoriaVm>
+@{ ViewData["Title"] = "Auditoria"; }
+<h1 class="h4 mb-3">Auditoria (últimas 200 ações)</h1>
+<div class="table-wrap table-responsive">
+    <table class="table mb-0">
+        <thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Alvo</th><th>Detalhe</th></tr></thead>
+        <tbody>
+        @foreach (var a in Model)
+        {
+            <tr><td>@a.Data.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td><td>@a.AtorNome</td><td>@a.Acao</td><td>@a.Alvo</td><td class="small text-muted">@a.Detalhe</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

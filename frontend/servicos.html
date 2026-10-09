@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Ordem de Serviço - TechCare Soluções</title>
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/servicos.css" />
+
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.documentElement.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) {
+          document.body.dataset.theme = prefs.tema;
+        }
+
+        if (prefs.compactarTabelas) {
+          document.body.dataset.compact = "true";
+        }
+
+        if (prefs.altoContraste) {
+          document.body.dataset.contrast = "true";
+        }
+      } catch {}
+    })();
+  </script>
+
+  <aside class="sidebar">
+    <h1>TechCare Soluções</h1>
+
+    <nav aria-label="Menu principal do sistema">
+
+      <a href="index.html">
+        <i data-lucide="layout-dashboard"></i>
+        Dashboard
+      </a>
+
+      <a href="clientes.html">
+        <i data-lucide="users"></i>
+        Clientes
+      </a>
+
+      <a href="agendamentos.html">
+        <i data-lucide="calendar-days"></i>
+        Agendamentos
+      </a>
+
+      <a href="servicos.html" class="active">
+        <i data-lucide="clipboard-list"></i>
+        Ordens de Serviço
+      </a>
+
+      <a href="cadastro-servicos.html" data-admin-only>
+        <i data-lucide="wrench"></i>
+        Serviços
+      </a>
+
+      <a href="produtos.html" data-admin-only><i data-lucide="package"></i> Produtos</a>
+
+      <a href="financeiro.html" data-admin-only><i data-lucide="wallet"></i> Financeiro</a>
+
+      <a href="historico.html" data-admin-only><i data-lucide="history"></i> Histórico</a>
+
+      <a href="usuarios.html" data-admin-only><i data-lucide="user-cog"></i> Atendentes</a>
+
+      <a href="configuracoes.html">
+        <i data-lucide="settings"></i>
+        Configurações
+      </a>
+
+      <div class="logout">
+        <a id="logoutLink" href="login.html">
+          <i data-lucide="log-out"></i>
+          Sair
+        </a>
+      </div>
+
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <header class="page-header">
+      <h1>Ordem de Serviço</h1>
+
+      <p>
+        Preencha os dados da ordem de serviço,
+        visualize o documento e exporte em PDF.
+      </p>
+    </header>
+
+    <section class="panel">
+
+      <h2>Dados da Ordem de Serviço</h2>
+
+      <form id="osForm" class="form-grid">
+
+        <input type="hidden" id="ordemServicoId" />
+
+        <div class="os-grid" style="grid-column:1/-1;">
+
+          <div class="os-field">
+            <label for="clienteId">Cliente</label>
+
+            <select id="clienteId" required>
+              <option value="">Selecione o cliente</option>
+            </select>
+          </div>
+
+          <div class="os-field">
+            <label for="profissionalId">
+              Atendente responsável
+            </label>
+
+            <select id="profissionalId" required>
+              <option value="">Selecione o atendente</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="os-grid" style="grid-column:1/-1;">
+
+          <div class="os-field">
+            <label for="status">
+              Status da OS
+            </label>
+
+            <input
+              type="text"
+              id="status"
+              required
+              placeholder="Exemplo: Aberta"
+            />
+          </div>
+
+          <div class="os-field">
+            <label for="garantia">
+              Garantia
+            </label>
+
+            <input
+              type="text"
+              id="garantia"
+              placeholder="Exemplo: 90 dias"
+            />
+          </div>
+
+        </div>
+
+        <div class="os-grid" style="grid-column:1/-1;">
+
+          <div class="os-field">
+            <label for="titulo">
+              Título da OS
+            </label>
+
+            <input
+              type="text"
+              id="titulo"
+              required
+              placeholder="Exemplo: Troca de tela"
+            />
+          </div>
+
+          <div class="os-field">
+            <label for="dataAbertura">
+              Data de abertura
+            </label>
+          
+            <input
+              type="datetime-local"
+              id="dataAbertura"
+              required
+            />
+          </div>
+          <div class="os-grid" style="grid-column:1/-1;">
+
+            <div class="os-field">
+              <label for="dataPrevista">
+                Data prevista
+              </label>
+
+              <input
+                type="datetime-local"
+                id="dataPrevista"
+              />
+            </div>
+
+            <div class="os-field">
+              <label for="dataConclusao">
+                Data de conclusão
+              </label>
+
+              <input
+                type="datetime-local"
+                id="dataConclusao"
+              />
+            </div>
+
+          </div>
+        </div>
+
+        <div class="os-field" style="grid-column:1/-1;">
+
+          <label for="descricao">
+            Descrição do serviço
+          </label>
+
+          <textarea
+            id="descricao"
+            rows="4"
+            required
+            placeholder="Descreva o serviço"
+          ></textarea>
+
+        </div>
+
+        <div class="divider" style="grid-column:1/-1;"></div>
+
+        <div class="os-field" style="grid-column:1/-1;">
+          <label for="cartItem">Carrinho: adicionar produto ou serviço</label>
+          <div class="cart-add">
+            <select id="cartItem" aria-label="Produto ou serviço">
+              <option value="">Selecione um produto ou serviço</option>
+            </select>
+            <input type="number" id="cartQtd" min="1" step="1" value="1" aria-label="Quantidade" />
+            <button type="button" id="cartAdd">Adicionar ao carrinho</button>
+          </div>
+        </div>
+
+        <div class="os-field tc-table-wrap" style="grid-column:1/-1;">
+          <table aria-label="Itens do carrinho">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Valor unitário</th>
+                <th>Subtotal</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+          </table>
+        </div>
+
+        <div class="os-field" style="grid-column:1/-1;">
+          <label for="descontoValor">Desconto</label>
+          <div class="cart-add cart-discount">
+            <input type="text" id="descontoValor" inputmode="decimal" placeholder="0" aria-label="Valor do desconto" />
+            <select id="descontoTipo" aria-label="Tipo de desconto">
+              <option value="R$">R$ (reais)</option>
+              <option value="%">% (porcentagem)</option>
+            </select>
+          </div>
+          <div class="cart-totals" aria-live="polite">
+            <div>Subtotal: <strong id="cartSubtotal">R$ 0,00</strong></div>
+            <div>Desconto: <strong id="cartDesconto">- R$ 0,00</strong></div>
+            <div class="cart-total">Total: <strong id="cartTotal">R$ 0,00</strong></div>
+          </div>
+        </div>
+
+        <div class="os-field" style="grid-column:1/-1;">
+
+          <label for="imagens">
+            Imagens anexadas
+          </label>
+
+          <input
+            type="file"
+            id="imagens"
+            accept="image/*"
+            multiple
+          />
+
+          <div class="thumbs" id="thumbs"></div>
+
+        </div>
+
+        <div
+          class="form-actions"
+          style="grid-column:1/-1;"
+        >
+
+          <button
+            type="button"
+            onclick="atualizarPreview()"
+          >
+            Gerar pré-visualização
+          </button>
+
+          <button
+            type="button"
+            class="secondary"
+            onclick="exportarPDF()"
+          >
+            Exportar PDF
+          </button>
+
+          <button
+            type="button"
+            id="btnSalvarOS"
+          >
+            Finalizar e salvar OS
+          </button>
+
+          <button
+            type="button"
+            class="secondary"
+            onclick="limparFormulario()"
+          >
+            Limpar
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <section class="panel">
+
+      <h2>Pré-visualização da Ordem de Serviço</h2>
+
+      <div
+        id="osPreview"
+        class="os-preview"
+      >
+      <div class="os-header">
+
+        <div class="os-logo">
+          <img src="img/LogoTc.png" alt="TechCare Logo" />
+        </div>
+        
+        <div class="os-number" id="previewNumeroOS">
+          OS #0001
+        </div>
+        <div class="os-company">
+          <div
+              class="tag"
+              id="previewStatus"
+            >
+              Status da OS
+            </div>
+          <h2>TechCare Soluções</h2>
+
+          <div class="muted">
+            suporte@techcare.com
+          </div>
+        </div>
+        <div class="divider"></div>
+
+          <div class="signature-area">
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <p>Assinatura do cliente</p>
+            </div>
+
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <p>Responsável técnico</p>
+            </div>
+          </div>
+      </div>
+
+        <div class="divider"></div>
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:flex-start;
+                    gap:12px;
+                  "
+                >
+
+          <div>
+
+            
+
+            <h3
+              id="previewTitulo"
+              style="margin:8px 0 0 0;"
+            >
+              Título da ordem de serviço
+            </h3>
+
+            <div
+              class="muted"
+              id="previewDescricao"
+            >
+              Descrição do serviço
+            </div>
+
+          </div>
+
+          <div style="text-align:right;">
+            <label>Datas</label>
+              <div class="muted">
+                Data de Abertura
+              </div>
+
+            <div
+              id="previewDataAbertura"
+              style="font-weight:700;"
+            >
+              
+            </div>
+            <div class="muted">Data Prevista</div>
+                <div id="previewDataPrevista"
+                style="font-weight:700;">
+                
+                </div>
+
+                <div class="muted">Data de Conclusão</div>
+                <div id="previewDataConclusao"
+                style="font-weight:700;">
+                  
+              </div>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="os-grid">
+
+          <div class="info-box">
+
+            <label>
+              Atendente responsável
+            </label>
+
+            <div
+              class="info-value"
+              id="previewProfissionalNome"
+            >
+              Nome do atendente
+            </div>
+
+          </div>
+
+          <div class="info-box">
+
+            <label>
+              Dados do cliente
+            </label>
+
+            <div
+              class="info-value"
+              id="previewClienteNome"
+            >
+              Nome do cliente
+            </div>
+
+            <div
+              class="muted"
+              id="previewClienteEmail"
+            >
+              E-mail
+            </div>
+
+            <div
+              class="muted"
+              id="previewClienteTelefone"
+            >
+              Telefone
+            </div>
+
+            <div
+              class="muted"
+              id="previewClienteCPF"
+            >
+              CPF
+            </div>
+
+          </div>
+
+          <div class="info-box">
+
+            <label>
+              Garantia
+            </label>
+
+            <div
+              class="info-value"
+              id="previewGarantia"
+            >
+              Sem garantia
+            </div>
+
+          </div>
+
+          <div class="info-box">
+
+            <label>
+              Itens do carrinho
+            </label>
+          
+            <div
+              class="info-value"
+              id="previewItens"
+              style="white-space:pre-line;"
+            >
+              Nenhum item no carrinho
+            </div>
+
+          </div>
+
+          <div class="info-box">
+            <label>Pagamento</label>
+            <div class="info-value" id="previewPagamento">Forma de pagamento não informada</div>
+            <div class="muted">Subtotal: <span id="previewSubtotal">R$ 0,00</span></div>
+            <div class="muted">Desconto: <span id="previewDesconto">- R$ 0,00</span></div>
+            <div class="info-value">Total: <span id="previewTotal">R$ 0,00</span></div>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+
+          <label
+            style="
+              display:block;
+              font-size:12px;
+              color:#64748b;
+              margin-bottom:8px;
+            "
+          >
+            Imagens anexadas
+          </label>
+
+          <div
+            class="thumbs"
+            id="previewImagens"
+            style="gap:12px;"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+      <section class="panel">
+      <h2>Ordens de serviço registradas</h2>
+      <p>Histórico das ordens salvas, com valores e forma de pagamento.</p>
+      <div class="tc-table-wrap">
+        <table aria-label="Ordens de serviço registradas">
+          <thead>
+            <tr>
+              <th data-filter-col="0" style="cursor:pointer;">ID</th>
+              <th data-filter-col="1" style="cursor:pointer;">Cliente</th>
+              <th data-filter-col="2" style="cursor:pointer;">Título</th>
+              <th data-filter-col="3" style="cursor:pointer;">Data</th>
+              <th>Status</th>
+              <th data-filter-col="5" style="cursor:pointer;">Pagamento</th>
+              <th data-filter-col="6" style="cursor:pointer;">Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="ordensTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <dialog id="pagDialog" class="pay-dialog" aria-labelledby="pagTitulo">
+    <h3 id="pagTitulo">Qual a forma de pagamento?</h3>
+    <p>Total a pagar: <strong id="pagTotal">R$ 0,00</strong></p>
+
+    <div class="pay-options" role="group" aria-label="Forma de pagamento">
+      <button type="button" data-pay="Pix">Pix</button>
+      <button type="button" data-pay="Cartão">Cartão</button>
+      <button type="button" data-pay="Dinheiro">Dinheiro</button>
+    </div>
+
+    <div id="pagDinheiro" hidden>
+      <label for="valorRecebido">Valor recebido (opcional)</label>
+      <input type="text" id="valorRecebido" inputmode="decimal" placeholder="Ex.: 100" />
+      <p>Troco: <strong id="pagTroco">R$ 0,00</strong></p>
+    </div>
+
+    <p id="pagMsg" style="color:#dc2626;" aria-live="polite"></p>
+
+    <div class="form-actions">
+      <button type="button" id="pagConfirm">Confirmar e salvar</button>
+      <button type="button" class="secondary" id="pagCancel">Cancelar</button>
+    </div>
+  </dialog>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script src="js/api.js"></script>
+
+  <script type="module">
+    import { requireAuth } from "./js/guard.js";
+    import { initAppState } from "./js/appState.js";
+
+    await requireAuth();
+    await initAppState();
+  </script>
+  
+  <script src="js/formAutosave.js"></script>
+
+  <script
+    type="module"
+    src="./js/logout.js"
+  ></script>
+
+  <script src="js/servicos.js"></script>
+  <script src="js/leituraVoz.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <div vw class="enabled">
+
+    <div
+      vw-access-button
+      class="active"
+    ></div>
+
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+  <script>
+    new window.VLibras.Widget(
+      "https://vlibras.gov.br/app"
+    );
+  </script>
+
+</body>
+</html>

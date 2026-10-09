@@ -1,0 +1,16 @@
+@model DiversidadeVm
+@{ ViewData["Title"] = "Diversidade"; }
+<h1 class="h4 mb-3">Diversidade (todas as lojas)</h1>
+<div class="table-wrap table-responsive mb-3">
+    <table class="table mb-0">
+        <thead><tr><th>Etnia (autodeclarada)</th><th>Equipe</th><th>Clientes</th></tr></thead>
+        <tbody>
+        @for (var i = 0; i < Model.Equipe.PorEtnia.Count; i++)
+        {
+            <tr><td>@Model.Equipe.PorEtnia[i].Etnia</td><td>@Model.Equipe.PorEtnia[i].Quantidade</td><td>@Model.Clientes.PorEtnia[i].Quantidade</td></tr>
+        }
+            <tr class="fw-bold"><td>Total</td><td>@Model.Equipe.Total</td><td>@Model.Clientes.Total</td></tr>
+        </tbody>
+    </table>
+</div>
+<p class="text-muted small">@Model.Observacao</p>

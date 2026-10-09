@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Financeiro • TechCare</title>
+  <link rel="shortcut icon" href="img/LogoTC.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) document.documentElement.dataset.theme = prefs.tema;
+
+        if (prefs.corPrincipal) {
+          document.documentElement.style.setProperty("--primary", prefs.corPrincipal);
+          document.documentElement.style.setProperty("--primary-2", prefs.corPrincipal);
+        }
+
+        if (prefs.fatorFonte) {
+          document.documentElement.style.setProperty("--fontScale", prefs.fatorFonte);
+        }
+      } catch {}
+    })();
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("tc_preferences") || "{}");
+
+        if (prefs.tema) document.body.dataset.theme = prefs.tema;
+        if (prefs.compactarTabelas) document.body.dataset.compact = "true";
+        if (prefs.altoContraste) document.body.dataset.contrast = "true";
+      } catch {}
+    })();
+  </script>
+
+  <aside class="sidebar">
+    <h1>TechCare Soluções</h1>
+
+    <nav>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="clientes.html"><i data-lucide="users"></i> Clientes</a>
+      <a href="agendamentos.html"><i data-lucide="calendar-days"></i> Agendamentos</a>
+      <a href="servicos.html"><i data-lucide="clipboard-list"></i> Ordens de Serviço</a>
+      <a href="cadastro-servicos.html" data-admin-only><i data-lucide="wrench"></i> Serviços</a>
+      <a href="produtos.html" data-admin-only><i data-lucide="package"></i> Produtos</a>
+
+      <a href="financeiro.html" class="active" data-admin-only><i data-lucide="wallet"></i> Financeiro</a>
+
+      <a href="historico.html" data-admin-only><i data-lucide="history"></i> Histórico</a>
+
+      <a href="usuarios.html" data-admin-only><i data-lucide="user-cog"></i> Atendentes</a>
+      <a href="configuracoes.html"><i data-lucide="settings"></i> Configurações</a>
+
+      <div class="logout">
+        <a id="logoutLink" href="login.html"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Financeiro</h1>
+      <p>Cadastre, consulte e remova serviços usados nas ordens de serviço.</p>
+    </header>
+
+    <section class="panel">
+      <h2>Período</h2>
+      <p>Escolha como agrupar o faturamento e, se quiser, um intervalo de datas. Conta só ordens concluídas.</p>
+
+      <form id="filtros" class="form-grid">
+        <div class="os-field">
+          <label for="fAgrupar">Agrupar por</label>
+          <select id="fAgrupar">
+            <option value="dia">Dias</option>
+            <option value="semana">Semanas</option>
+            <option value="mes" selected>Meses</option>
+            <option value="ano">Anos</option>
+          </select>
+        </div>
+        <div class="os-field"><label for="fDe">De (opcional)</label><input type="date" id="fDe" /></div>
+        <div class="os-field"><label for="fAte">Até (opcional)</label><input type="date" id="fAte" /></div>
+        <div class="form-actions">
+          <button type="submit">Atualizar</button>
+          <button type="button" class="secondary" id="fLimpar">Período padrão</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="cards" aria-label="Resumo financeiro" style="margin-top:20px;">
+      <div class="card"><h2>Faturamento no período</h2><p id="rFat">R$ 0,00</p></div>
+      <div class="card"><h2>Ordens concluídas</h2><p id="rQtd">0</p></div>
+      <div class="card"><h2>Ticket médio</h2><p id="rTicket">R$ 0,00</p></div>
+      <div class="card"><h2>Descontos dados</h2><p id="rDesc">R$ 0,00</p></div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2 id="graficoTitulo">Faturamento</h2>
+      <p id="rPag"></p>
+      <div id="fatBarras" class="barras" role="img" aria-label="Gráfico de faturamento"></div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Faturamento por período</h2>
+      <div class="tc-table-wrap">
+        <table aria-label="Faturamento por período">
+          <thead><tr><th>Período</th><th>Ordens</th><th>Faturamento</th></tr></thead>
+          <tbody id="serieBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Vendas por atendente</h2>
+      <p>No período escolhido. Quem vende mais aparece primeiro.</p>
+      <ol id="rankLista" class="rank-lista"></ol>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+
+  <script type="module">
+    import { requireAuth } from "./js/guard.js";
+    import { initAppState } from "./js/appState.js";
+
+    await requireAuth();
+    await initAppState();
+  </script>
+  <script src="js/formAutosave.js"></script>
+  <script type="module" src="./js/logout.js"></script>
+  <script src="js/financeiro.js"></script>
+  <script src="js/leituraVoz.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget("https://vlibras.gov.br/app");
+  </script>
+</body>
+</html>
