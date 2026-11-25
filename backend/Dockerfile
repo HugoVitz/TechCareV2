@@ -4,7 +4,7 @@
 # Contexto de build: raiz do repositório (precisa da pasta frontend/).
 #   docker build -f backend/Dockerfile -t techcare-api .
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 # Restaura primeiro só com o .csproj: a camada de pacotes fica em cache entre builds.
 COPY backend/TechCarePro.Api.csproj backend/
