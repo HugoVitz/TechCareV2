@@ -1,0 +1,13 @@
+# Configurações que NÃO são segredo (ficam versionadas).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  TZ: "America/Sao_Paulo"
+  name: techcare-config
+  namespace: techcare
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080;http://+:9091"
+  Metrics__Porta: "9091"
+  Seed__DadosDemo: "false"
+  Api__BaseUrl: "http://techcare-api/api/"

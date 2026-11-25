@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Biblioteca de domínio compartilhada: regras de negócio sem dependência de interface ou banco.
+       Usada pelo módulo desktop (WPF) e pelos testes automatizados. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TechCare.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>

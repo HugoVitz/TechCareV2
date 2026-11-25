@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TechCarePro.Models
 {
@@ -21,5 +22,14 @@ namespace TechCarePro.Models
 
         /// <summary>Produto inativo não aparece no carrinho dos atendentes.</summary>
         public bool Ativo { get; set; } = true;
+
+        /// <summary>
+        /// Controle de concorrência OTIMISTA: mapeado para a coluna de sistema xmin do PostgreSQL.
+        /// Se dois atendentes alterarem o mesmo produto ao mesmo tempo, o segundo recebe um conflito
+        /// em vez de sobrescrever o estoque. Não é enviado no JSON.
+        /// </summary>
+        [Timestamp]
+        [JsonIgnore]
+        public uint Versao { get; set; }
     }
 }

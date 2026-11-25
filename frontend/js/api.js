@@ -1,6 +1,7 @@
-// Mesma origem quando a API serve o painel (porta 5000); caso contrário, aponta para a API na porta 5000.
+// Mesma origem quando a própria API serve o painel (/painel/, porta 5000, Docker ou Kubernetes com HTTPS);
+// caso contrário (ex.: Live Server na porta 5500), aponta para a API na porta 5000.
 window.API_BASE =
-  location.port === "5000"
+  location.pathname.startsWith("/painel/") || location.port === "5000"
     ? `${location.origin}/api`
     : location.hostname === "localhost" || location.hostname === "127.0.0.1"
       ? "http://localhost:5000/api"

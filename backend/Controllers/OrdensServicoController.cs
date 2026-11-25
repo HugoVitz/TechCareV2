@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using TechCarePro.Api.Data;
 using TechCarePro.Security;
 using TechCarePro.Models;
@@ -90,7 +91,7 @@ namespace TechCarePro.Controllers
 
             var lista = await query.OrderByDescending(o => o.DataAbertura).ToListAsync();
 
-            // Soma em memória: o provider SQLite não agrega decimal no servidor.
+            // Soma em memória (lista já carregada; evita uma consulta por OS).
             return Ok(lista.Select(o => new
             {
                 o.Id,
@@ -137,7 +138,8 @@ namespace TechCarePro.Controllers
             var concluida = os.Status.StartsWith("Conclu", StringComparison.OrdinalIgnoreCase);
             os.DataConclusao = concluida ? (input.DataConclusao ?? DateTime.Now) : null;
 
-            await _context.SaveChangesAsync();
+            var conflito = await SalvarAsync();
+            if (conflito is not null) return conflito;
             return Ok(new { os.Id, os.Status, os.DataConclusao });
         }
 
@@ -252,7 +254,8 @@ namespace TechCarePro.Controllers
             }
 
             _context.OrdemServicos.Add(os);
-            await _context.SaveChangesAsync();
+            var conflito = await SalvarAsync();
+            if (conflito is not null) return conflito;
 
             // Carregar para retorno consistente
             os = await _context.OrdemServicos
@@ -275,8 +278,32 @@ namespace TechCarePro.Controllers
                 await MoverEstoqueAsync(existing.Produtos, +1); // excluir a OS devolve os produtos ao estoque
 
             _context.OrdemServicos.Remove(existing);
-            await _context.SaveChangesAsync();
+            var conflito = await SalvarAsync();
+            if (conflito is not null) return conflito;
             return NoContent();
+        }
+
+        /// <summary>
+        /// Grava as alterações tratando a concorrência entre atendentes:
+        /// - otimista (xmin): o produto mudou entre a leitura e a gravação;
+        /// - restrição do banco (CHECK/trigger): a baixa deixaria o estoque negativo.
+        /// Em ambos os casos nada é gravado e a API responde 409 (Conflict).
+        /// </summary>
+        private async Task<ActionResult?> SalvarAsync()
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+                return null;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { mensagem = "O estoque de um produto foi alterado por outra pessoa ao mesmo tempo. Confira e tente novamente." });
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.CheckViolation })
+            {
+                return Conflict(new { mensagem = "Estoque insuficiente: outra venda usou as últimas unidades. Atualize a tela e tente novamente." });
+            }
         }
 
         /// <summary>

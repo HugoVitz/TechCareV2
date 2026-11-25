@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "API",
+      "type": "shell",
+      "command": "dotnet run --urls http://0.0.0.0:5000 --no-launch-profile",
+      "options": { "cwd": "${workspaceFolder}/backend", "env": { "ASPNETCORE_ENVIRONMENT": "Development" } },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "techcare" }
+    },
+    {
+      "label": "Console do Dono",
+      "type": "shell",
+      "command": "dotnet run --urls http://localhost:5100 --no-launch-profile",
+      "options": { "cwd": "${workspaceFolder}/admin-mvc", "env": { "ASPNETCORE_ENVIRONMENT": "Development" } },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "techcare" }
+    },
+    {
+      "label": "API + Console do Dono",
+      "dependsOn": ["API", "Console do Dono"],
+      "problemMatcher": []
+    }
+  ]
+}

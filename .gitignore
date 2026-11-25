@@ -1,5 +1,22 @@
+# Compilação .NET
 bin/
 obj/
-*.db
+*.user
 .vs/
-.vscode/
+TestResults/
+resultados-testes/
+
+# Banco local antigo (SQLite, PIM VII) e dados
+*.db
+*.db-shm
+*.db-wal
+
+# Flutter
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Execução local
+logs/
+.env

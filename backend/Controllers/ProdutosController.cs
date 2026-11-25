@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 using TechCarePro.Api.Data;
 using TechCarePro.Models;
 using TechCarePro.Security;
@@ -56,8 +58,67 @@ namespace TechCarePro.Controllers
             existing.Estoque = produto.Estoque;
             existing.Ativo = produto.Ativo;
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Uma venda baixou o estoque entre a abertura da tela e o salvamento.
+                return Conflict(new { mensagem = "Este produto foi alterado por outra pessoa (provavelmente uma venda). Recarregue e tente de novo." });
+            }
             return Ok(existing);
+        }
+
+        public class AjusteEstoqueInput
+        {
+            /// <summary>Positivo para entrada (compra), negativo para saída (perda, avaria, inventário).</summary>
+            public int Quantidade { get; set; }
+            public string Motivo { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Ajuste manual de estoque pela stored procedure sp_ajustar_estoque, que trava a linha do
+        /// produto (SELECT ... FOR UPDATE), valida o saldo e registra a movimentação via trigger.
+        /// Usado pelo módulo desktop e disponível no Swagger.
+        /// </summary>
+        [Authorize(Roles = Perfis.Admin)]
+        [HttpPost("{id:int}/ajuste-estoque")]
+        public async Task<IActionResult> AjustarEstoque(int id, AjusteEstoqueInput input)
+        {
+            if (input.Quantidade == 0 || Math.Abs(input.Quantidade) > 100_000)
+                return BadRequest("Informe uma quantidade diferente de zero (até 100.000).");
+            var motivo = (input.Motivo ?? string.Empty).Trim();
+            if (motivo.Length is 0 or > 100)
+                return BadRequest("Informe o motivo do ajuste (até 100 caracteres).");
+
+            var conexao = (NpgsqlConnection)_context.Database.GetDbConnection();
+            await _context.Database.OpenConnectionAsync();
+            try
+            {
+                await using var cmd = new NpgsqlCommand(
+                    "CALL sp_ajustar_estoque(@loja, @produto, @quantidade, @motivo::varchar, @usuario::varchar, NULL)", conexao);
+                cmd.Parameters.AddWithValue("loja", NpgsqlDbType.Integer, _tenant.LojaId);
+                cmd.Parameters.AddWithValue("produto", NpgsqlDbType.Integer, id);
+                cmd.Parameters.AddWithValue("quantidade", NpgsqlDbType.Integer, input.Quantidade);
+                cmd.Parameters.AddWithValue("motivo", NpgsqlDbType.Text, motivo);
+                cmd.Parameters.AddWithValue("usuario", NpgsqlDbType.Text, _tenant.UsuarioNome);
+
+                var estoqueFinal = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                return Ok(new { id, estoque = estoqueFinal });
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.NoDataFound)
+            {
+                return NotFound(ex.MessageText);
+            }
+            catch (PostgresException ex) when (ex.SqlState is PostgresErrorCodes.CheckViolation or PostgresErrorCodes.InvalidParameterValue)
+            {
+                return BadRequest(ex.MessageText);
+            }
+            finally
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
         }
 
         [Authorize(Roles = Perfis.Admin)]

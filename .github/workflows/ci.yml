@@ -1,0 +1,135 @@
+# Integração contínua (CI): roda a cada push e pull request.
+# Se qualquer etapa falhar, o merge fica bloqueado e nada é publicado.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  dotnet:
+    name: Build e testes (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Compilar API, Console MVC e biblioteca Core
+        run: |
+          dotnet build backend/TechCarePro.Api.csproj -c Release
+          dotnet build admin-mvc/TechCare.Admin.csproj -c Release
+          dotnet build core/TechCare.Core/TechCare.Core.csproj -c Release
+      - name: Testes unitários (xUnit) com cobertura
+        run: dotnet test tests/TechCare.Tests/TechCare.Tests.csproj -c Release --logger "trx;LogFileName=resultados.trx" --collect:"XPlat Code Coverage" --results-directory ./resultados-testes
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultados-testes
+          path: resultados-testes
+
+  banco:
+    name: Testes do banco (PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: techcare
+          POSTGRES_USER: techcare
+          POSTGRES_PASSWORD: techcare_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U techcare" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGUSER: techcare
+      PGPASSWORD: techcare_ci
+      PGDATABASE: techcare
+    steps:
+      - uses: actions/checkout@v4
+      - name: Criar tabelas (equivalente ao EF Core)
+        run: psql -v ON_ERROR_STOP=1 -f database/testes/00_schema_equivalente_ef.sql
+      - name: Aplicar scripts (functions, procedures, triggers, índices, segurança)
+        run: for f in backend/Database/*.sql; do psql -v ON_ERROR_STOP=1 -q -f "$f"; done
+      - name: Reaplicar scripts (devem ser idempotentes)
+        run: for f in backend/Database/*.sql; do psql -v ON_ERROR_STOP=1 -q -f "$f"; done
+      - name: Testes funcionais do banco
+        run: psql -v ON_ERROR_STOP=1 -f database/testes/10_testes_funcionais.sql
+
+  desktop:
+    name: Build do módulo desktop (WPF)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet publish desktop/TechCare.Desktop/TechCare.Desktop.csproj -c Release -o publicado-desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: techcare-desktop
+          path: publicado-desktop
+
+  mobile:
+    name: Análise do app Flutter
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+
+  imagens:
+    name: Imagens Docker
+    needs: [dotnet, banco]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Login no GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Nome do repositório em minúsculas
+        id: repo
+        run: echo "dono=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - name: Build (e push na main) da API
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.dono }}/techcare-api:${{ github.sha }}
+            ghcr.io/${{ steps.repo.outputs.dono }}/techcare-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build (e push na main) do Console do Dono
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: admin-mvc/Dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.dono }}/techcare-console:${{ github.sha }}
+            ghcr.io/${{ steps.repo.outputs.dono }}/techcare-console:latest

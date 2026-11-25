@@ -40,8 +40,10 @@ namespace TechCarePro.Controllers
             if (vendedorId.HasValue) query = query.Where(o => o.VendedorId == vendedorId.Value);
             if (!string.IsNullOrWhiteSpace(q))
             {
-                var t = q.Trim();
-                query = query.Where(o => o.ClienteNome.Contains(t) || o.Titulo.Contains(t) || o.Descricao.Contains(t));
+                // ILIKE: busca sem diferenciar maiúsculas (no PostgreSQL o LIKE diferencia).
+                // Os curingas digitados pelo usuário são escapados; o índice de trigramas acelera a busca.
+                var t = "%" + q.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
+                query = query.Where(o => EF.Functions.ILike(o.ClienteNome, t) || EF.Functions.ILike(o.Titulo, t) || EF.Functions.ILike(o.Descricao, t));
             }
 
             var lista = await query.OrderByDescending(o => o.DataAbertura).Take(5000).ToListAsync();

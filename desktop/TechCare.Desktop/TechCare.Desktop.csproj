@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Módulo desktop (WPF) para o Administrador da loja: indicadores e gestão de estoque.
+       Conversa com a mesma API REST do sistema web e do app (nunca acessa o banco direto). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TechCare.Desktop</RootNamespace>
+    <AssemblyName>TechCare.Desktop</AssemblyName>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\TechCare.Core\TechCare.Core.csproj" />
+  </ItemGroup>
+
+</Project>

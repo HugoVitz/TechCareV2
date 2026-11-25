@@ -222,7 +222,7 @@ class _Sidebar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('TechCare Soluções',
-                  style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
+                  style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
               const SizedBox(height: 10),
               Row(children: [
                 Tooltip(

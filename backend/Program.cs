@@ -6,10 +6,15 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using TechCarePro.Api.Data;
 using TechCarePro.Models;
 using TechCarePro.Security;
 using TechCarePro.Services;
+
+// O modelo usa DateTime "local" em vários pontos; este modo mantém o comportamento
+// do SQLite (timestamp sem fuso) no PostgreSQL e evita erros de DateTime.Kind.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +40,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TechCare Pro API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TechCare API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -57,14 +62,24 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
 
-// O banco fica SEMPRE na pasta do projeto (backend/techcare.db), não importa de onde o programa foi aberto.
-// Assim o login e os dados continuam os mesmos entre uma execução e outra.
-var sqliteCs = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(
-    builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=techcare.db");
-if (!Path.IsPathRooted(sqliteCs.DataSource))
-    sqliteCs.DataSource = Path.Combine(builder.Environment.ContentRootPath, sqliteCs.DataSource);
+// ---------- Banco de dados: PostgreSQL ----------
+// A string de conexão vem de ConnectionStrings:DefaultConnection (appsettings ou variável de ambiente
+// ConnectionStrings__DefaultConnection, que é como o Docker e o Kubernetes a informam).
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection (PostgreSQL) ou a variável ConnectionStrings__DefaultConnection.");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(sqliteCs.ToString()));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString, npgsql =>
+        // Resiliência: refaz automaticamente comandos que falham por queda momentânea do banco (nuvem).
+        npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null)));
+
+// Health checks para o Kubernetes: "live" (o processo responde) e "ready" (o banco está acessível).
+builder.Services.AddHealthChecks()
+    .AddCheck<BancoHealthCheck>("postgresql", tags: new[] { "ready" });
+
+// Rotinas periódicas no banco (procedures de manutenção e atualização da visão materializada).
+builder.Services.AddHostedService<ManutencaoBancoService>();
 
 // CORS configurável (Cors:Origins). O app Flutter não depende de CORS.
 var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
@@ -167,6 +182,7 @@ if (painelExiste)
     app.UseStaticFiles(new StaticFileOptions { FileProvider = painelFiles, RequestPath = "/painel" });
 }
 
+app.UseHttpMetrics(); // contadores e tempos de resposta por rota (Prometheus)
 app.UseCors("Frontend");
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -189,16 +205,27 @@ app.Use(async (ctx, next) =>
 
 app.MapControllers();
 
+// Observabilidade: sondas do Kubernetes e métricas para o Prometheus/Grafana.
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
+// Em produção (Kubernetes) as métricas ficam numa porta interna (Metrics:Porta), fora do Ingress.
+var portaMetricas = app.Configuration.GetValue<int?>("Metrics:Porta");
+if (portaMetricas is int porta)
+    app.MapMetrics().RequireHost($"*:{porta}");
+else
+    app.MapMetrics(); // GET /metrics
+
 // Atalhos: "/" abre o painel web (ou o app web, ou o Swagger); "/app" vira "/app/".
 var appPublicado = File.Exists(Path.Combine(app.Environment.WebRootPath ?? string.Empty, "app", "index.html"));
 app.MapGet("/", () => Results.Redirect(painelExiste ? "/painel/" : appPublicado ? "/app/" : "/swagger"));
 app.MapGet("/app", () => Results.Redirect("/app/"));
 
-// ---------- Banco: criação, ajuste de esquema, migração para multi-loja e contas iniciais ----------
+// ---------- Banco: tabelas (EF Core), objetos SQL (scripts), contas iniciais e dados de demonstração ----------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    SchemaUpdater.Executar(db, app.Configuration);
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbInitializer");
+    DbInitializer.Executar(db, app.Configuration, logger, app.Environment.IsDevelopment());
 }
 
 app.Run();

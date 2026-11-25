@@ -14,10 +14,25 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+    <!-- PIM VIII: banco migrado de SQLite para PostgreSQL (procedures, functions, triggers). -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <!-- Alinha o Relational com o EF Core 8.0.8 (o Npgsql 8.0.4 traz o 8.0.4 e gera conflito de versão). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
+    <!-- Métricas no formato Prometheus em /metrics (monitoramento no Kubernetes). -->
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Scripts SQL executados pelo DbInitializer na inicialização (vão junto na publicação e no Docker). -->
+    <None Include="Database\*.sql" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Permite que o projeto de testes acesse classes internas. -->
+    <InternalsVisibleTo Include="TechCare.Tests" />
   </ItemGroup>
 
 </Project>

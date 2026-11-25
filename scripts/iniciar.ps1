@@ -13,6 +13,26 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+# 0) Banco de dados PostgreSQL (PIM VIII). Usa o que estiver na porta 5432 ou sobe o contêiner do docker-compose.
+function Test-Porta($porta) {
+    try { $c = New-Object Net.Sockets.TcpClient; $c.Connect('127.0.0.1', $porta); $c.Close(); return $true } catch { return $false }
+}
+if (-not (Test-Porta 5432)) {
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        Write-Host 'Subindo o PostgreSQL no Docker (docker compose up -d db)...'
+        Push-Location $raiz
+        docker compose up -d db | Out-Null
+        Pop-Location
+        for ($i = 0; $i -lt 30 -and -not (Test-Porta 5432); $i++) { Start-Sleep -Seconds 2 }
+    }
+    if (-not (Test-Porta 5432)) {
+        Write-Host 'PostgreSQL não encontrado na porta 5432.' -ForegroundColor Red
+        Write-Host 'Abra o Docker Desktop e rode de novo, ou instale o PostgreSQL 16 (veja COMO-RODAR.md).' -ForegroundColor Red
+        exit 1
+    }
+}
+Write-Host 'PostgreSQL disponível na porta 5432.' -ForegroundColor Green
+
 function Get-IpLocal {
     $ips = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
         Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' }

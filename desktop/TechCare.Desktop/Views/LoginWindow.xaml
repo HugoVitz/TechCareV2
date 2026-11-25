@@ -1,0 +1,23 @@
+<Window x:Class="TechCare.Desktop.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TechCare Desktop - Entrar" Width="380" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Background="{StaticResource CorFundo}" FocusManager.FocusedElement="{Binding ElementName=UsuarioBox}">
+    <StackPanel Margin="24">
+        <TextBlock Text="TechCare Desktop" FontSize="22" FontWeight="Bold" Foreground="{StaticResource CorPrincipal}" />
+        <TextBlock Text="Módulo do Administrador: indicadores e estoque" Style="{StaticResource Rotulo}" Margin="0,2,0,18" />
+
+        <TextBlock Text="Endereço do sistema" Style="{StaticResource Rotulo}" />
+        <TextBox Text="{Binding Servidor, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock Text="Usuário" Style="{StaticResource Rotulo}" />
+        <TextBox x:Name="UsuarioBox" Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock Text="Senha" Style="{StaticResource Rotulo}" />
+        <PasswordBox x:Name="SenhaBox" Padding="6,4" Margin="0,2,0,14" />
+
+        <Button Content="Entrar" IsDefault="True" Click="Entrar_Click" HorizontalAlignment="Stretch" Margin="0" />
+        <TextBlock Text="{Binding Mensagem}" Foreground="#B91C1C" TextWrapping="Wrap" Margin="0,12,0,0" />
+    </StackPanel>
+</Window>

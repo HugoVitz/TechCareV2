@@ -1,0 +1,7 @@
+# Namespace isola os recursos do TechCare dentro do cluster.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: techcare
+  labels:
+    app.kubernetes.io/part-of: techcare

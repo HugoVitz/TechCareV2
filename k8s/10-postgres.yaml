@@ -1,0 +1,69 @@
+# PostgreSQL dentro do cluster (desenvolvimento/homologação).
+# Em produção na nuvem, a arquitetura usa o serviço gerenciado (Azure Database for PostgreSQL
+# Flexible Server, com backup automático e alta disponibilidade); aí este arquivo não é aplicado.
+apiVersion: v1
+kind: Service
+metadata:
+  name: techcare-db
+  namespace: techcare
+spec:
+  selector:
+    app: techcare-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: techcare-db
+  namespace: techcare
+spec:
+  serviceName: techcare-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: techcare-db
+  template:
+    metadata:
+      labels:
+        app: techcare-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          args: ["-c", "timezone=America/Sao_Paulo"]
+          ports:
+            - containerPort: 5432
+          env:
+            - name: TZ
+              value: America/Sao_Paulo
+            - name: POSTGRES_DB
+              value: techcare
+            - name: POSTGRES_USER
+              value: techcare
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: techcare-secrets
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "techcare", "-d", "techcare"]
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "512Mi" }
+            limits:   { cpu: "1",    memory: "1Gi" }
+          volumeMounts:
+            - name: dados
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: dados
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

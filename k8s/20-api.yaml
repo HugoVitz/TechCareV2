@@ -1,0 +1,115 @@
+# API + painel web. Várias réplicas atrás de um Service; o Kubernetes só envia tráfego
+# para réplicas "prontas" (readinessProbe) e reinicia as que travarem (livenessProbe).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techcare-api
+  namespace: techcare
+  labels:
+    app: techcare-api
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0        # atualização sem derrubar o sistema (zero downtime)
+  selector:
+    matchLabels:
+      app: techcare-api
+  template:
+    metadata:
+      labels:
+        app: techcare-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          # A pipeline de CD troca esta tag pela do commit (ghcr.io/<usuario>/techcare-api:<sha>).
+          image: ghcr.io/SEU-USUARIO/techcare-api:latest
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metricas
+              containerPort: 9091
+          envFrom:
+            - configMapRef:
+                name: techcare-config
+            - secretRef:
+                name: techcare-secrets
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "200m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "512Mi" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: techcare-api
+  namespace: techcare
+spec:
+  selector:
+    app: techcare-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+# Escalabilidade horizontal automática: de 2 a 6 réplicas conforme o uso de CPU.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: techcare-api
+  namespace: techcare
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: techcare-api
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+# Durante manutenções do cluster, pelo menos uma réplica continua no ar.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: techcare-api
+  namespace: techcare
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: techcare-api

@@ -1,0 +1,18 @@
+# Atualizações automáticas de dependências (segurança da cadeia de software).
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/backend"
+    schedule: { interval: weekly }
+  - package-ecosystem: nuget
+    directory: "/admin-mvc"
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: "/backend"
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }
+  - package-ecosystem: pub
+    directory: "/mobile"
+    schedule: { interval: monthly }

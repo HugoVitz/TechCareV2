@@ -60,6 +60,11 @@ namespace TechCarePro.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden,
                     "Seu acesso está bloqueado. Fale com o administrador.");
 
+            // Senha gravada com parâmetros antigos (PIM VII): regrava com 600 mil iterações.
+            // A gravação acontece junto com a criação da sessão, logo abaixo.
+            if (PasswordHasher.PrecisaAtualizar(usuario.SenhaHash))
+                usuario.SenhaHash = PasswordHasher.Hash(request.Senha);
+
             Loja? loja = null;
             if (usuario.LojaId.HasValue)
             {

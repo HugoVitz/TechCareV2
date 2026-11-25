@@ -1,0 +1,46 @@
+# Entrega contínua (CD): publica a versão no cluster Kubernetes.
+# Roda manualmente (Actions > CD > Run workflow) ou ao criar uma tag v* (ex.: v2.0.0).
+# Requer o segredo KUBE_CONFIG (kubeconfig do cluster, em base64) nas configurações do repositório.
+name: CD
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  deploy:
+    name: Deploy no Kubernetes
+    runs-on: ubuntu-latest
+    environment: producao          # permite exigir aprovação manual antes do deploy
+    env:
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar acesso ao cluster
+        id: cluster
+        run: |
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "Segredo KUBE_CONFIG não configurado: deploy ignorado." >> "$GITHUB_STEP_SUMMARY"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            mkdir -p ~/.kube && echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: azure/setup-kubectl@v4
+        if: steps.cluster.outputs.ok == 'true'
+      - name: Aplicar manifestos e atualizar imagens
+        if: steps.cluster.outputs.ok == 'true'
+        run: |
+          DONO="${GITHUB_REPOSITORY_OWNER,,}"
+          kubectl apply -f k8s/00-namespace.yaml -f k8s/01-configmap.yaml
+          kubectl apply -f k8s/20-api.yaml -f k8s/30-console.yaml -f k8s/40-ingress.yaml -f k8s/50-networkpolicy.yaml
+          kubectl -n techcare set image deployment/techcare-api api=ghcr.io/$DONO/techcare-api:${GITHUB_SHA}
+          kubectl -n techcare set image deployment/techcare-console console=ghcr.io/$DONO/techcare-console:${GITHUB_SHA}
+      - name: Aguardar rollout (desfaz se falhar)
+        if: steps.cluster.outputs.ok == 'true'
+        run: |
+          if ! kubectl -n techcare rollout status deployment/techcare-api --timeout=180s; then
+            kubectl -n techcare rollout undo deployment/techcare-api
+            exit 1
+          fi

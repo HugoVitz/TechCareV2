@@ -1,0 +1,9 @@
+# Coleta as métricas da API (prometheus-net) a cada 15 segundos.
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: techcare-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8080"]

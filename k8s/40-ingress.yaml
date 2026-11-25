@@ -1,0 +1,31 @@
+# Entrada HTTPS do cluster (NGINX Ingress Controller + cert-manager com Let's Encrypt).
+# Só o tráfego web chega de fora; o banco e as métricas ficam internos.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: techcare
+  namespace: techcare
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [app.techcare.exemplo.com.br, console.techcare.exemplo.com.br]
+      secretName: techcare-tls
+  rules:
+    - host: app.techcare.exemplo.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: techcare-api, port: { number: 80 } }
+    - host: console.techcare.exemplo.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: techcare-console, port: { number: 80 } }
