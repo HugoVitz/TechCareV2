@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.23" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -17,7 +17,7 @@
     <!-- PIM VIII: banco migrado de SQLite para PostgreSQL (procedures, functions, triggers). -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
     <!-- Alinha o Relational com o EF Core 8.0.8 (o Npgsql 8.0.4 traz o 8.0.4 e gera conflito de versão). -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.23" />
     <!-- Métricas no formato Prometheus em /metrics (monitoramento no Kubernetes). -->
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
