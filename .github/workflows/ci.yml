@@ -114,7 +114,7 @@ jobs:
         id: repo
         run: echo "dono=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
       - name: Build (e push na main) da API
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: backend/Dockerfile
@@ -125,7 +125,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build (e push na main) do Console do Dono
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: admin-mvc/Dockerfile
