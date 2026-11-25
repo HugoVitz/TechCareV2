@@ -1,4 +1,4 @@
-# Cria o backlog do PIM VIII no GitHub: rótulos, marcos (sprints), issues e o quadro do GitHub Projects.
+﻿# Cria o backlog do PIM VIII no GitHub: rótulos, marcos (sprints), issues e o quadro do GitHub Projects.
 # Pré-requisitos: GitHub CLI instalado (https://cli.github.com) e login com permissão de projetos:
 #   gh auth login
 #   gh auth refresh -s project
