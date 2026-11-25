@@ -12,7 +12,7 @@ RUN dotnet restore backend/TechCarePro.Api.csproj
 COPY backend/ backend/
 RUN dotnet publish backend/TechCarePro.Api.csproj -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 # Painel web da loja, servido pela própria API em /painel/.
